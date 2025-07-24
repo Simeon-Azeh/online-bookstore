@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
-const { asyncHandler } = require("../middleware/errorMiddleware"); 
+const { asyncHandler } = require("../middleware/errorMiddleware");
 
 // Swagger documentation
 /**
@@ -172,8 +172,7 @@ router.post(
 
     // Find user
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
@@ -193,5 +192,17 @@ router.post(
     });
   })
 );
+
+// @route   GET /api/users
+// @desc    Get all users
+// @access  Public
+router.get("/", async (req, res) => {
+  try {
+    const users = await User.find({}, "-password"); // Exclude password field
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = router;

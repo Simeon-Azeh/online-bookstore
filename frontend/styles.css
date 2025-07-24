@@ -1,0 +1,10 @@
+/* == Styles ==*/
+body {
+  background-color: #f8f9fa;
+}
+#book-list .card {
+  min-height: 300px;
+}
+#cart-items .card {
+  margin-bottom: 1rem;
+}
