@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Bookstore - Admin</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 70px;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      color: #0d6efd;
+    }
+    .admin-sidebar {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      bottom: 0;
+      width: 250px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-right: 1px solid #dee2e6;
+      overflow-y: auto;
+    }
+    .admin-content {
+      margin-left: 250px;
+      padding: 20px;
+    }
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        position: static;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .admin-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="../books.html">📚 Bookstore Admin</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="../books.html">View Store</a>
+          </li>
+        </ul>
+        <div class="d-flex">
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+              <i class="fas fa-user"></i> <span id="adminName">Admin</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block admin-sidebar">
+        <div class="d-flex flex-column">
+          <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action active" id="manageBooks">
+              <i class="fas fa-book me-2"></i> Manage Books
+            </a>
+            <a href="#" class="list-group-item list-group-item-action" id="viewOrders">
+              <i class="fas fa-shopping-cart me-2"></i> View Orders
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 admin-content">
+        <!-- Book Management Section -->
+        <div id="bookManagementSection">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Book Management</h2>
+            <button class="btn btn-primary" id="addBookBtn">
+              <i class="fas fa-plus"></i> Add New Book
+            </button>
+          </div>
+          
+          <!-- Books Table -->
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="booksTableBody">
+                <tr>
+                  <td colspan="5" class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading books...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Orders Section -->
+        <div id="ordersSection" style="display: none;">
+          <h2 class="mb-4">Order Management</h2>
+          
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <tr>
+                  <td colspan="6" class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading orders...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Book Modal -->
+  <div class="modal fade" id="bookModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bookModalTitle">Add New Book</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="bookForm">
+            <input type="hidden" id="bookId">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input type="text" class="form-control" id="title" required>
+            </div>
+            <div class="mb-3">
+              <label for="author" class="form-label">Author</label>
+              <input type="text" class="form-control" id="author" required>
+            </div>
+            <div class="mb-3">
+              <label for="price" class="form-label">Price ($)</label>
+              <input type="number" class="form-control" id="price" min="0.01" step="0.01" required>
+            </div>
+            <div class="mb-3">
+              <label for="stock" class="form-label">Stock</label>
+              <input type="number" class="form-control" id="stock" min="0" step="1" required>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveBookBtn">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Detail Modal -->
+  <div class="modal fade" id="orderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Order Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="orderDetailContent">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading order details...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <div class="dropdown d-inline-block">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="updateStatusBtn" data-bs-toggle="dropdown">
+              Update Status
+            </button>
+            <ul class="dropdown-menu" id="statusOptions">
+              <li><a class="dropdown-item" href="#" data-status="pending">Pending</a></li>
+              <li><a class="dropdown-item" href="#" data-status="processing">Processing</a></li>
+              <li><a class="dropdown-item" href="#" data-status="shipped">Shipped</a></li>
+              <li><a class="dropdown-item" href="#" data-status="delivered">Delivered</a></li>
+              <li><a class="dropdown-item" href="#" data-status="cancelled">Cancelled</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // API Configuration
+    const API_BASE_URL = "http://localhost:5000/api";
+    
+    // DOM Elements
+    const booksTableBody = document.getElementById('booksTableBody');
+    const ordersTableBody = document.getElementById('ordersTableBody');
+    const adminName = document.getElementById('adminName');
+    const bookManagementSection = document.getElementById('bookManagementSection');
+    const ordersSection = document.getElementById('ordersSection');
+    const orderDetailContent = document.getElementById('orderDetailContent');
+    
+    // Modals
+    const bookModal = new bootstrap.Modal(document.getElementById('bookModal'));
+    const orderDetailModal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+    
+    // Current state
+    let currentOrderId = null;
+    let isEditMode = false;
+    
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAdminAuth();
+      loadBooks();
+      setupEventListeners();
+    });
+    
+    // Check Admin Authentication
+    function checkAdminAuth() {
+      const token = localStorage.getItem('bookstore_token');
+      const user = localStorage.getItem('bookstore_user');
+      
+      if (!token || !user) {
+        alert('Please login as admin to access this page');
+        window.location.href = '../login.html';
+        return;
+      }
+      
+      currentUser = JSON.parse(user);
+      adminName.textContent = currentUser.name;
+      
+      // For a real app, you would check if the user has admin role here
+      // and redirect non-admin users away
+    }
+    
+    // Setup Event Listeners
+    function setupEventListeners() {
+      // Navigation
+      document.getElementById('manageBooks').addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(bookManagementSection, ordersSection);
+        document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+      });
+      
+      document.getElementById('viewOrders').addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(ordersSection, bookManagementSection);
+        loadOrders();
+        document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+      });
+      
+      // Book actions
+      document.getElementById('addBookBtn').addEventListener('click', () => {
+        isEditMode = false;
+        document.getElementById('bookForm').reset();
+        document.getElementById('bookId').value = '';
+        document.getElementById('bookModalTitle').textContent = 'Add New Book';
+        bookModal.show();
+      });
+      
+      document.getElementById('saveBookBtn').addEventListener('click', saveBook);
+      
+      // Status update options
+      document.getElementById('statusOptions').addEventListener('click', (e) => {
+        if (e.target.classList.contains('dropdown-item') && currentOrderId) {
+          const status = e.target.getAttribute('data-status');
+          updateOrderStatus(currentOrderId, status);
+        }
+      });
+      
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+      });
+    }
+    
+    // Show/Hide Sections
+    function showSection(showEl, hideEl) {
+      showEl.style.display = 'block';
+      hideEl.style.display = 'none';
+    }
+    
+    // Book Management
+    async function loadBooks() {
+      try {
+        booksTableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-3">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading books...</p>
+            </td>
+          </tr>
+        `;
+        
+        const response = await axios.get(`${API_BASE_URL}/books`);
+        const books = response.data;
+        
+        booksTableBody.innerHTML = '';
+        
+        if (books.length === 0) {
+          booksTableBody.innerHTML = `
+            <tr>
+              <td colspan="5" class="text-center">No books available. Add your first book!</td>
+            </tr>
+          `;
+          return;
+        }
+        
+        books.forEach(book => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td>$${book.price.toFixed(2)}</td>
+            <td>
+              <span class="badge bg-${book.stock > 0 ? 'success' : 'danger'}">
+                ${book.stock > 0 ? book.stock : 'Out of Stock'}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-primary edit-book-btn" data-id="${book._id}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-danger delete-book-btn" data-id="${book._id}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          
+          booksTableBody.appendChild(tr);
+          
+          // Add event listeners
+          tr.querySelector('.edit-book-btn').addEventListener('click', () => editBook(book._id));
+          tr.querySelector('.delete-book-btn').addEventListener('click', () => deleteBook(book._id, book.title));
+        });
+      } catch (error) {
+        booksTableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center text-danger">Error loading books. Please try again.</td>
+          </tr>
+        `;
+        console.error('Error loading books:', error);
+      }
+    }
+    
+    async function editBook(bookId) {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/books/${bookId}`);
+        const book = response.data;
+        
+        isEditMode = true;
+        document.getElementById('bookId').value = book._id;
+        document.getElementById('title').value = book.title;
+        document.getElementById('author').value = book.author;
+        document.getElementById('price').value = book.price;
+        document.getElementById('stock').value = book.stock;
+        document.getElementById('description').value = book.description || '';
+        
+        document.getElementById('bookModalTitle').textContent = 'Edit Book';
+        bookModal.show();
+      } catch (error) {
+        alert('Error loading book details');
+        console.error('Error:', error);
+      }
+    }
+    
+    async function saveBook() {
+      const bookId = document.getElementById('bookId').value;
+      const title = document.getElementById('title').value;
+      const author = document.getElementById('author').value;
+      const price = parseFloat(document.getElementById('price').value);
+      const stock = parseInt(document.getElementById('stock').value);
+      const description = document.getElementById('description').value;
+      
+      if (!title || !author || isNaN(price) || isNaN(stock)) {
+        alert('Please fill in all required fields');
+        return;
+      }
+      
+      const bookData = {
+        title,
+        author,
+        price,
+        stock,
+        description
+      };
+      
+      try {
+        if (isEditMode) {
+          await axios.put(`${API_BASE_URL}/books/${bookId}`, bookData, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+            }
+          });
+          alert('Book updated successfully');
+        } else {
+          await axios.post(`${API_BASE_URL}/books`, bookData, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+            }
+          });
+          alert('Book added successfully');
+        }
+        
+        bookModal.hide();
+        loadBooks();
+      } catch (error) {
+        alert(`Error: ${error.response?.data?.message || 'Could not save book'}`);
+        console.error('Error saving book:', error);
+      }
+    }
+    
+    async function deleteBook(bookId, bookTitle) {
+      if (!confirm(`Are you sure you want to delete "${bookTitle}"?`)) {
+        return;
+      }
+      
+      try {
+        await axios.delete(`${API_BASE_URL}/books/${bookId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+          }
+        });
+        
+        alert('Book deleted successfully');
+        loadBooks();
+      } catch (error) {
+        alert(`Error: ${error.response?.data?.message || 'Could not delete book'}`);
+        console.error('Error deleting book:', error);
+      }
+    }
+    
+    // Order Management
+    async function loadOrders() {
+      try {
+        ordersTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-3">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading orders...</p>
+            </td>
+          </tr>
+        `;
+        
+        const response = await axios.get(`${API_BASE_URL}/orders`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+          }
+        });
+        
+        const orders = response.data;
+        
+        ordersTableBody.innerHTML = '';
+        
+        if (orders.length === 0) {
+          ordersTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center">No orders found</td>
+            </tr>
+          `;
+          return;
+        }
+        
+        orders.forEach(order => {
+          const date = new Date(order.createdAt).toLocaleDateString();
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${order._id}</td>
+            <td>${order.user.name || 'Unknown'}</td>
+            <td>${date}</td>
+            <td>$${order.totalPrice.toFixed(2)}</td>
+            <td>
+              <span class="badge bg-${getStatusBadgeColor(order.status)}">
+                ${order.status}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-info view-order-btn" data-id="${order._id}">
+                <i class="fas fa-eye"></i> View
+              </button>
+            </td>
+          `;
+          
+          ordersTableBody.appendChild(tr);
+          
+          // Add event listener
+          tr.querySelector('.view-order-btn').addEventListener('click', () => viewOrderDetails(order._id));
+        });
+      } catch (error) {
+        ordersTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center text-danger">Error loading orders. Please try again.</td>
+          </tr>
+        `;
+        console.error('Error loading orders:', error);
+      }
+    }
+    
+    async function viewOrderDetails(orderId) {
+      try {
+        currentOrderId = orderId;
+        
+        orderDetailContent.innerHTML = `
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading order details...</p>
+          </div>
+        `;
+        
+        orderDetailModal.show();
+        
+        const response = await axios.get(`${API_BASE_URL}/orders/${orderId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+          }
+        });
+        
+        const order = response.data;
+        const date = new Date(order.createdAt).toLocaleDateString();
+        
+        let itemsHtml = '';
+        order.items.forEach(item => {
+          itemsHtml += `
+            <tr>
+              <td>${item.book.title || 'Unknown Book'}</td>
+              <td>$${item.book.price ? item.book.price.toFixed(2) : '0.00'}</td>
+              <td>${item.quantity}</td>
+              <td>$${(item.book.price * item.quantity).toFixed(2)}</td>
+            </tr>
+          `;
+        });
+        
+        orderDetailContent.innerHTML = `
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p><strong>Order ID:</strong> ${order._id}</p>
+              <p><strong>Date:</strong> ${date}</p>
+              <p><strong>Customer:</strong> ${order.user.name} (${order.user.email})</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Status:</strong> <span class="badge bg-${getStatusBadgeColor(order.status)}">${order.status}</span></p>
+              <p><strong>Total:</strong> $${order.totalPrice.toFixed(2)}</p>
+              <p><strong>Shipping Address:</strong> ${order.shippingAddress || 'Not provided'}</p>
+            </div>
+          </div>
+          <h6>Order Items:</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Book</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        orderDetailContent.innerHTML = `
+          <div class="alert alert-danger">
+            Error loading order details. Please try again.
+          </div>
+        `;
+        console.error('Error loading order details:', error);
+      }
+    }
+    
+    async function updateOrderStatus(orderId, status) {
+      try {
+        await axios.put(`${API_BASE_URL}/orders/${orderId}/status`, { status }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+          }
+        });
+        
+        alert(`Order status updated to ${status}`);
+        orderDetailModal.hide();
+        loadOrders();
+      } catch (error) {
+        alert(`Error: ${error.response?.data?.message || 'Could not update order status'}`);
+        console.error('Error updating order status:', error);
+      }
+    }
+    
+    function getStatusBadgeColor(status) {
+      switch (status) {
+        case 'pending': return 'warning';
+        case 'processing': return 'info';
+        case 'shipped': return 'primary';
+        case 'delivered': return 'success';
+        case 'cancelled': return 'danger';
+        default: return 'secondary';
+      }
+    }
+    
+    // Logout
+    function logout() {
+      localStorage.removeItem('bookstore_token');
+      localStorage.removeItem('bookstore_user');
+      window.location.href = '../login.html';
+    }
+  </script>
+</body>
+</html>
