@@ -59,7 +59,7 @@ A RESTful API for managing books, users, shopping carts, and orders for an onlin
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/online-bookstore.git
+git clone https://github.com/Simeon-Azeh/online-bookstore.git
 cd online-bookstore/backend
 ```
 
