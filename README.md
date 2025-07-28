@@ -2,6 +2,10 @@
 
 A RESTful API for managing books, users, shopping carts, and orders for an online bookstore.
 
+## DEMO video
+
+https://youtu.be/cb7grv0Z2NE
+
 ## Features
 
 - User registration and authentication
