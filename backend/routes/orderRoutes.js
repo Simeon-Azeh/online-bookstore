@@ -61,7 +61,7 @@ const { asyncHandler } = require("../middleware/errorMiddleware");
 
 /**
  * @swagger
- * /orders:
+ * /api/orders:
  *   post:
  *     summary: Create a new order
  *     tags: [Orders]
@@ -177,7 +177,7 @@ router.post(
 
 /**
  * @swagger
- * /orders:
+ * /api/orders:
  *   get:
  *     summary: Retrieve all orders (admin)
  *     tags: [Orders]
@@ -205,7 +205,7 @@ router.get(
 
 /**
  * @swagger
- * /orders/user/{userId}:
+ * /api/orders/user/{userId}:
  *   get:
  *     summary: Get orders for a specific user
  *     tags: [Orders]
@@ -240,7 +240,7 @@ router.get(
 
 /**
  * @swagger
- * /orders/{orderId}/status:
+ * /api/orders/{orderId}/status:
  *   put:
  *     summary: Update order status
  *     tags: [Orders]
