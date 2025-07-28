@@ -2,21 +2,6 @@
 
 A RESTful API for managing books, users, shopping carts, and orders for an online bookstore.
 
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Database Schema](#database-schema)
-- [Setup Instructions](#setup-instructions)
-- [API Documentation](#api-documentation)
-- [Endpoints](#endpoints)
-- [Frontend Usage](#frontend-usage)
-- [Deployment](#deployment)
-- [License](#license)
-
----
-
 ## Features
 
 - User registration and authentication
@@ -59,7 +44,7 @@ A RESTful API for managing books, users, shopping carts, and orders for an onlin
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/online-bookstore.git
+git clone https://github.com/Simeon-Azeh/online-bookstore.git
 cd online-bookstore/backend
 ```
 
@@ -141,7 +126,7 @@ http://localhost:5000/api-docs
 
 ---
 
-## Frontend Usage
+## Frontend
 
 If you have a frontend (e.g., in `/frontend`):
 
@@ -154,6 +139,10 @@ If you have a frontend (e.g., in `/frontend`):
 ## Deployment
 
 - Deploy the backend to services like Render, Heroku, or Vercel.
+
+currently deployed at 
+https://online-bookstore-yqif.onrender.com/api-docs/
+
 - Set environment variables in your deployment dashboard.
 - For security, Swagger UI should only be enabled in development.
 
@@ -164,3 +153,7 @@ If you have a frontend (e.g., in `/frontend`):
 MIT
 
 ---
+
+## Contact
+
+For questions or support, open an issue or contact us
