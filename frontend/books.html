@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Bookstore - Browse Books</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 70px;
+    }
+    .book-card {
+      height: 100%;
+      transition: transform 0.3s;
+    }
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .cart-badge {
+      position: relative;
+      top: -8px;
+      right: 5px;
+    }
+    #cartModal .modal-body {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      color: #0d6efd;
+    }
+    .auth-required {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="books.html">📚 Bookstore</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="books.html">Books</a>
+          </li>
+          <li class="nav-item auth-required">
+            <a class="nav-link" href="#" id="ordersLink">My Orders</a>
+          </li>
+        </ul>
+        <div class="d-flex">
+          <button id="cartBtn" class="btn btn-outline-primary me-2 position-relative">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span id="cartCount" class="badge bg-danger cart-badge">0</span>
+          </button>
+          <div class="dropdown auth-required">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+              <i class="fas fa-user"></i> <span id="userName">User</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+          </div>
+          <div id="loginButtons">
+            <a href="login.html" class="btn btn-primary me-2">Login</a>
+            <a href="register.html" class="btn btn-outline-success">Register</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mb-5">
+    <h1 class="my-4">Browse Books</h1>
+    
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading books...</p>
+    </div>
+    
+    <!-- Books Grid -->
+    <div id="booksContainer" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4"></div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Shopping Cart</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="emptyCartMessage" class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x mb-3 text-muted"></i>
+            <p class="lead">Your cart is empty</p>
+            <p>Add some books to get started!</p>
+          </div>
+          <div id="cartItems">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Book</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cartItemsList"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <div>
+            <button id="clearCartBtn" class="btn btn-outline-danger">Clear Cart</button>
+          </div>
+          <div>
+            <p class="fw-bold mb-2">Total: $<span id="cartTotal">0.00</span></p>
+            <button id="checkoutBtn" class="btn btn-success">Proceed to Checkout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div class="modal fade" id="checkoutModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Checkout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="checkoutForm">
+            <div class="mb-3">
+              <label for="shippingAddress" class="form-label">Shipping Address</label>
+              <textarea class="form-control" id="shippingAddress" rows="3" required></textarea>
+            </div>
+          </form>
+          <div class="alert alert-info">
+            <p class="mb-0">Total Amount: $<span id="checkoutTotal">0.00</span></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button id="placeOrderBtn" class="btn btn-primary">Place Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Modal -->
+  <div class="modal fade" id="ordersModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">My Orders</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="ordersLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading your orders...</p>
+          </div>
+          <div id="noOrdersMessage" class="text-center py-5" style="display: none;">
+            <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+            <p class="lead">You haven't placed any orders yet</p>
+          </div>
+          <div id="ordersList"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // API Configuration
+    const API_BASE_URL = "http://localhost:5000/api";
+    
+    // DOM Elements
+    const booksContainer = document.getElementById('booksContainer');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const cartCount = document.getElementById('cartCount');
+    const cartItemsList = document.getElementById('cartItemsList');
+    const cartTotal = document.getElementById('cartTotal');
+    const checkoutTotal = document.getElementById('checkoutTotal');
+    const emptyCartMessage = document.getElementById('emptyCartMessage');
+    const cartItems = document.getElementById('cartItems');
+    const loginButtons = document.getElementById('loginButtons');
+    const userName = document.getElementById('userName');
+    const authRequired = document.querySelectorAll('.auth-required');
+    const ordersList = document.getElementById('ordersList');
+    const ordersLoading = document.getElementById('ordersLoading');
+    const noOrdersMessage = document.getElementById('noOrdersMessage');
+    
+    // Modals
+    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+    const ordersModal = new bootstrap.Modal(document.getElementById('ordersModal'));
+    
+    // Authentication state
+    let isAuthenticated = false;
+    let currentUser = null;
+    
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      loadBooks();
+      loadCart();
+      setupEventListeners();
+    });
+    
+    // Check Authentication
+    function checkAuth() {
+      const token = localStorage.getItem('bookstore_token');
+      const user = localStorage.getItem('bookstore_user');
+      
+      if (token && user) {
+        isAuthenticated = true;
+        currentUser = JSON.parse(user);
+        userName.textContent = currentUser.name;
+        
+        // Show authenticated elements
+        authRequired.forEach(el => el.style.display = 'block');
+        loginButtons.style.display = 'none';
+      }
+    }
+    
+    // Setup Event Listeners
+    function setupEventListeners() {
+      // Cart button
+      document.getElementById('cartBtn').addEventListener('click', () => {
+        updateCartDisplay();
+        cartModal.show();
+      });
+      
+      // Checkout button
+      document.getElementById('checkoutBtn').addEventListener('click', () => {
+        if (!isAuthenticated) {
+          alert('Please login to checkout');
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        cartModal.hide();
+        checkoutModal.show();
+      });
+      
+      // Place order button
+      document.getElementById('placeOrderBtn').addEventListener('click', placeOrder);
+      
+      // Clear cart button
+      document.getElementById('clearCartBtn').addEventListener('click', clearCart);
+      
+      // Orders link
+      document.getElementById('ordersLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        loadOrders();
+        ordersModal.show();
+      });
+      
+      // Logout button
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+      });
+    }
+    
+    // Load Books
+    async function loadBooks() {
+      try {
+        loadingSpinner.style.display = 'block';
+        booksContainer.innerHTML = '';
+        
+        const response = await axios.get(`${API_BASE_URL}/books`);
+        const books = response.data;
+        
+        loadingSpinner.style.display = 'none';
+        
+        if (books.length === 0) {
+          booksContainer.innerHTML = `
+            <div class="col-12 text-center py-5">
+              <p class="lead">No books available at the moment.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        books.forEach(book => {
+          const bookCard = createBookCard(book);
+          booksContainer.appendChild(bookCard);
+        });
+      } catch (error) {
+        loadingSpinner.style.display = 'none';
+        booksContainer.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <p class="text-danger">Error loading books. Please try again later.</p>
+          </div>
+        `;
+        console.error('Error loading books:', error);
+      }
+    }
+    
+    // Create Book Card
+    function createBookCard(book) {
+      const col = document.createElement('div');
+      col.className = 'col';
+      
+      const outOfStock = book.stock <= 0;
+      
+      col.innerHTML = `
+        <div class="card book-card h-100">
+          <div class="card-body">
+            <h5 class="card-title">${book.title}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">${book.author}</h6>
+            <p class="card-text">
+              ${book.description || 'No description available.'}
+            </p>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="fw-bold">$${book.price.toFixed(2)}</span>
+            ${outOfStock ? 
+              `<span class="badge bg-danger">Out of Stock</span>` : 
+              `<button class="btn btn-sm btn-primary add-to-cart-btn" data-book='${JSON.stringify(book)}'>
+                <i class="fas fa-cart-plus"></i> Add to Cart
+              </button>`
+            }
+          </div>
+        </div>
+      `;
+      
+      // Add event listener to Add to Cart button
+      if (!outOfStock) {
+        const addToCartBtn = col.querySelector('.add-to-cart-btn');
+        addToCartBtn.addEventListener('click', (e) => {
+          const bookData = JSON.parse(e.currentTarget.getAttribute('data-book'));
+          addToCart(bookData);
+        });
+      }
+      
+      return col;
+    }
+    
+    // Cart Functions
+    function loadCart() {
+      const cart = JSON.parse(localStorage.getItem('bookstore_cart') || '[]');
+      updateCartCount(cart);
+    }
+    
+    function addToCart(book) {
+      const cart = JSON.parse(localStorage.getItem('bookstore_cart') || '[]');
+      
+      // Check if book already in cart
+      const existingItem = cart.find(item => item.book._id === book._id);
+      
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          book: {
+            _id: book._id,
+            title: book.title,
+            price: book.price
+          },
+          quantity: 1
+        });
+      }
+      
+      localStorage.setItem('bookstore_cart', JSON.stringify(cart));
+      updateCartCount(cart);
+      
+      // Show success toast or alert
+      alert(`"${book.title}" added to cart!`);
+    }
+    
+    function updateCartCount(cart) {
+      const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCount.textContent = itemCount;
+    }
+    
+    function updateCartDisplay() {
+      const cart = JSON.parse(localStorage.getItem('bookstore_cart') || '[]');
+      
+      if (cart.length === 0) {
+        emptyCartMessage.style.display = 'block';
+        cartItems.style.display = 'none';
+        document.getElementById('clearCartBtn').disabled = true;
+        document.getElementById('checkoutBtn').disabled = true;
+        return;
+      }
+      
+      emptyCartMessage.style.display = 'none';
+      cartItems.style.display = 'block';
+      document.getElementById('clearCartBtn').disabled = false;
+      document.getElementById('checkoutBtn').disabled = false;
+      
+      let total = 0;
+      cartItemsList.innerHTML = '';
+      
+      cart.forEach(item => {
+        const itemTotal = item.book.price * item.quantity;
+        total += itemTotal;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.book.title}</td>
+          <td>$${item.book.price.toFixed(2)}</td>
+          <td>
+            <div class="input-group input-group-sm" style="width: 100px">
+              <button class="btn btn-outline-secondary decrease-btn" data-id="${item.book._id}">-</button>
+              <input type="text" class="form-control text-center" value="${item.quantity}" readonly>
+              <button class="btn btn-outline-secondary increase-btn" data-id="${item.book._id}">+</button>
+            </div>
+          </td>
+          <td>$${itemTotal.toFixed(2)}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger remove-btn" data-id="${item.book._id}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
+        
+        cartItemsList.appendChild(tr);
+        
+        // Add event listeners for cart item buttons
+        tr.querySelector('.decrease-btn').addEventListener('click', () => updateItemQuantity(item.book._id, -1));
+        tr.querySelector('.increase-btn').addEventListener('click', () => updateItemQuantity(item.book._id, 1));
+        tr.querySelector('.remove-btn').addEventListener('click', () => removeFromCart(item.book._id));
+      });
+      
+      cartTotal.textContent = total.toFixed(2);
+      checkoutTotal.textContent = total.toFixed(2);
+    }
+    
+    function updateItemQuantity(bookId, change) {
+      const cart = JSON.parse(localStorage.getItem('bookstore_cart') || '[]');
+      const itemIndex = cart.findIndex(item => item.book._id === bookId);
+      
+      if (itemIndex !== -1) {
+        cart[itemIndex].quantity += change;
+        
+        if (cart[itemIndex].quantity <= 0) {
+          cart.splice(itemIndex, 1);
+        }
+        
+        localStorage.setItem('bookstore_cart', JSON.stringify(cart));
+        updateCartCount(cart);
+        updateCartDisplay();
+      }
+    }
+    
+    function removeFromCart(bookId) {
+      const cart = JSON.parse(localStorage.getItem('bookstore_cart') || '[]');
+      const updatedCart = cart.filter(item => item.book._id !== bookId);
+      
+      localStorage.setItem('bookstore_cart', JSON.stringify(updatedCart));
+      updateCartCount(updatedCart);
+      updateCartDisplay();
+    }
+    
+    function clearCart() {
+      localStorage.removeItem('bookstore_cart');
+      updateCartCount([]);
+      updateCartDisplay();
+    }
+    
+    // Order Functions
+    async function placeOrder() {
+      if (!isAuthenticated) {
+        alert('Please login to place an order');
+        return;
+      }
+      
+      const cart = JSON.parse(localStorage.getItem('bookstore_cart') || '[]');
+      if (cart.length === 0) {
+        alert('Your cart is empty');
+        return;
+      }
+      
+      const shippingAddress = document.getElementById('shippingAddress').value;
+      if (!shippingAddress) {
+        alert('Please enter a shipping address');
+        return;
+      }
+      
+      try {
+        const items = cart.map(item => ({
+          bookId: item.book._id,
+          quantity: item.quantity
+        }));
+        
+        const orderData = {
+          userId: currentUser.id,
+          items: items,
+          shippingAddress: shippingAddress
+        };
+        
+        document.getElementById('placeOrderBtn').disabled = true;
+        document.getElementById('placeOrderBtn').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+        
+        const response = await axios.post(`${API_BASE_URL}/orders`, orderData, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+          }
+        });
+        
+        // Clear cart after successful order
+        clearCart();
+        checkoutModal.hide();
+        
+        // Show success message
+        alert('Order placed successfully!');
+        
+        // Reset form
+        document.getElementById('checkoutForm').reset();
+      } catch (error) {
+        console.error('Error placing order:', error);
+        alert(`Error: ${error.response?.data?.error || 'Could not place order'}`);
+      } finally {
+        document.getElementById('placeOrderBtn').disabled = false;
+        document.getElementById('placeOrderBtn').innerHTML = 'Place Order';
+      }
+    }
+    
+    async function loadOrders() {
+      if (!isAuthenticated) return;
+      
+      try {
+        ordersLoading.style.display = 'block';
+        ordersList.style.display = 'none';
+        noOrdersMessage.style.display = 'none';
+        
+        const response = await axios.get(`${API_BASE_URL}/orders/user/${currentUser.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('bookstore_token')}`
+          }
+        });
+        
+        const orders = response.data;
+        
+        ordersLoading.style.display = 'none';
+        
+        if (orders.length === 0) {
+          noOrdersMessage.style.display = 'block';
+          return;
+        }
+        
+        ordersList.style.display = 'block';
+        ordersList.innerHTML = '';
+        
+        orders.forEach(order => {
+          const orderCard = document.createElement('div');
+          orderCard.className = 'card mb-3';
+          
+          const date = new Date(order.createdAt).toLocaleDateString();
+          
+          let itemsHtml = '';
+          order.items.forEach(item => {
+            itemsHtml += `
+              <tr>
+                <td>${item.book.title || 'Unknown Book'}</td>
+                <td>$${item.book.price ? item.book.price.toFixed(2) : '0.00'}</td>
+                <td>${item.quantity}</td>
+                <td>$${(item.book.price * item.quantity).toFixed(2)}</td>
+              </tr>
+            `;
+          });
+          
+          orderCard.innerHTML = `
+            <div class="card-header d-flex justify-content-between">
+              <span>Order ID: ${order._id}</span>
+              <span>Date: ${date}</span>
+            </div>
+            <div class="card-body">
+              <div class="d-flex justify-content-between mb-3">
+                <span class="badge bg-${getStatusBadgeColor(order.status)}">${order.status}</span>
+                <span class="fw-bold">Total: $${order.totalPrice.toFixed(2)}</span>
+              </div>
+              <p><strong>Shipping Address:</strong> ${order.shippingAddress || 'Not provided'}</p>
+              <h6>Items:</h6>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Book</th>
+                      <th>Price</th>
+                      <th>Quantity</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${itemsHtml}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+          
+          ordersList.appendChild(orderCard);
+        });
+      } catch (error) {
+        ordersLoading.style.display = 'none';
+        ordersList.innerHTML = `
+          <div class="alert alert-danger">
+            Error loading orders. Please try again later.
+          </div>
+        `;
+        console.error('Error loading orders:', error);
+      }
+    }
+    
+    function getStatusBadgeColor(status) {
+      switch (status) {
+        case 'pending': return 'warning';
+        case 'processing': return 'info';
+        case 'shipped': return 'primary';
+        case 'delivered': return 'success';
+        case 'cancelled': return 'danger';
+        default: return 'secondary';
+      }
+    }
+    
+    // Logout
+    function logout() {
+      localStorage.removeItem('bookstore_token');
+      localStorage.removeItem('bookstore_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

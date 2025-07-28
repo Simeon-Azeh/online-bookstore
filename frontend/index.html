@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Bookstore - Your Gateway to Knowledge</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+      --accent-color: #ffc107;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+    }
+    
+    /* Header & Navigation */
+    .navbar-brand {
+      font-weight: 700;
+      color: var(--primary-color) !important;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 100px 0;
+      margin-bottom: 2rem;
+    }
+    
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    
+    .hero p {
+      font-size: 1.3rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    
+    /* Featured Books Section */
+    .book-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .book-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .book-card img {
+      height: 250px;
+      object-fit: cover;
+    }
+    
+    .book-price {
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    
+    /* Categories Section */
+    .category-card {
+      background-size: cover;
+      background-position: center;
+      height: 200px;
+      border-radius: 10px;
+      display: flex;
+      align-items: flex-end;
+      transition: transform 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .category-card:hover {
+      transform: scale(1.05);
+    }
+    
+    .category-overlay {
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+      width: 100%;
+      padding: 20px;
+      color: white;
+    }
+    
+    /* Testimonials */
+    .testimonial-card {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .testimonial-card .quote {
+      font-size: 1.1rem;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+    
+    .testimonial-card .author {
+      font-weight: 600;
+    }
+    
+    /* Newsletter */
+    .newsletter {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 60px 0;
+    }
+    
+    /* Footer */
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 50px 0 20px;
+    }
+    
+    footer a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+    }
+    
+    footer a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+    
+    .social-icons {
+      font-size: 1.5rem;
+      margin-right: 15px;
+    }
+    
+    /* Section Titles */
+    .section-title {
+      position: relative;
+      margin-bottom: 3rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    
+    .section-title:after {
+      content: "";
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background-color: var(--primary-color);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero p {
+        font-size: 1.1rem;
+      }
+      
+      .category-card {
+        height: 150px;
+        margin-bottom: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">📚 Bookstore</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="books.html">Books</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#categories">Categories</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#about">About Us</a>
+          </li>
+        </ul>
+        <div class="d-flex">
+          <a href="login.html" class="btn btn-outline-primary me-2">Login</a>
+          <a href="register.html" class="btn btn-primary">Register</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Discover Your Next Favorite Book</h1>
+      <p>Explore our extensive collection of books across various genres, from bestsellers to rare finds. Your literary journey begins here.</p>
+      <a href="books.html" class="btn btn-primary btn-lg px-4 me-2">Browse Books</a>
+      <a href="register.html" class="btn btn-outline-light btn-lg px-4">Join Today</a>
+    </div>
+  </section>
+
+  <!-- Featured Books -->
+  <section class="container my-5">
+    <h2 class="section-title">Featured Books</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      <!-- Book 1 -->
+      <div class="col">
+        <div class="card book-card">
+          <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Book Cover">
+          <div class="card-body">
+            <h5 class="card-title">The Art of Innovation</h5>
+            <p class="card-text text-muted">Thomas Kelly</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="book-price">$24.99</span>
+              <a href="books.html" class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Book 2 -->
+      <div class="col">
+        <div class="card book-card">
+          <img src="https://images.unsplash.com/photo-1531989417401-0f85f7e673f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Book Cover">
+          <div class="card-body">
+            <h5 class="card-title">Modern Philosophy</h5>
+            <p class="card-text text-muted">Sarah Johnson</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="book-price">$19.95</span>
+              <a href="books.html" class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Book 3 -->
+      <div class="col">
+        <div class="card book-card">
+          <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Book Cover">
+          <div class="card-body">
+            <h5 class="card-title">The Silent Waters</h5>
+            <p class="card-text text-muted">Michael Rivers</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="book-price">$15.50</span>
+              <a href="books.html" class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Book 4 -->
+      <div class="col">
+        <div class="card book-card">
+          <img src="https://images.unsplash.com/photo-1476275466078-4007374efbbe?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Book Cover">
+          <div class="card-body">
+            <h5 class="card-title">Digital Marketing Essentials</h5>
+            <p class="card-text text-muted">Rebecca Chen</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="book-price">$28.75</span>
+              <a href="books.html" class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="text-center mt-4">
+      <a href="books.html" class="btn btn-primary px-4">View All Books</a>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="bg-light py-5" id="about">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="img-fluid rounded shadow" alt="Bookstore Interior">
+        </div>
+        <div class="col-lg-6">
+          <h2 class="section-title text-start">About Our Bookstore</h2>
+          <p class="lead">Bringing literature to life since 2015</p>
+          <p>Welcome to our online bookstore, a literary haven for book enthusiasts. We curate a diverse collection of books spanning various genres, authors, and time periods.</p>
+          <p>Our mission is to promote reading and make quality literature accessible to everyone. We believe that books have the power to educate, inspire, and transform lives.</p>
+          <p>Whether you're searching for a thrilling page-turner, an insightful non-fiction work, or a heartwarming classic, we've got something for every reader.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="container my-5" id="categories">
+    <h2 class="section-title">Explore Categories</h2>
+    <div class="row">
+      <!-- Category 1 -->
+      <div class="col-md-4 mb-4">
+        <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1551029506-0807df4e2031?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');">
+          <div class="category-overlay">
+            <h5 class="mb-0">Fiction</h5>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 2 -->
+      <div class="col-md-4 mb-4">
+        <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');">
+          <div class="category-overlay">
+            <h5 class="mb-0">Science & Technology</h5>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 3 -->
+      <div class="col-md-4 mb-4">
+        <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1414124488080-0188dcbb8834?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');">
+          <div class="category-overlay">
+            <h5 class="mb-0">Business & Economics</h5>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 4 -->
+      <div class="col-md-4 mb-4">
+        <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1551334787-21e818a6db1f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');">
+          <div class="category-overlay">
+            <h5 class="mb-0">Self-Help</h5>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 5 -->
+      <div class="col-md-4 mb-4">
+        <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1576872381149-7847515ce5d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');">
+          <div class="category-overlay">
+            <h5 class="mb-0">Children's Books</h5>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 6 -->
+      <div class="col-md-4 mb-4">
+        <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1519791883288-d90b3356e6a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');">
+          <div class="category-overlay">
+            <h5 class="mb-0">History & Biography</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="text-center mt-2">
+      <a href="books.html" class="btn btn-primary px-4">Browse All Categories</a>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="bg-light py-5">
+    <div class="container">
+      <h2 class="section-title">What Our Readers Say</h2>
+      <div class="row">
+        <!-- Testimonial 1 -->
+        <div class="col-md-4">
+          <div class="testimonial-card">
+            <div class="quote">
+              "This online bookstore has become my go-to place for all my reading needs. Their collection is extensive and the delivery is always prompt."
+            </div>
+            <div class="author">- Amanda Johnson</div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 2 -->
+        <div class="col-md-4">
+          <div class="testimonial-card">
+            <div class="quote">
+              "I love how easy it is to navigate through the website and find exactly what I'm looking for. The recommendations are always spot on!"
+            </div>
+            <div class="author">- David Wilson</div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 3 -->
+        <div class="col-md-4">
+          <div class="testimonial-card">
+            <div class="quote">
+              "The customer service is exceptional. When there was an issue with my order, they resolved it immediately and even offered a discount on my next purchase."
+            </div>
+            <div class="author">- Sarah Parker</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter">
+    <div class="container text-center">
+      <h2 class="mb-4">Subscribe to Our Newsletter</h2>
+      <p class="mb-4">Stay updated with our newest arrivals, exclusive offers, and literary events.</p>
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <form class="d-flex">
+            <input type="email" class="form-control me-2" placeholder="Your email address">
+            <button type="submit" class="btn btn-warning">Subscribe</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <!-- About Column -->
+        <div class="col-lg-4 mb-4 mb-lg-0">
+          <h5>📚 Bookstore</h5>
+          <p>Your ultimate destination for books across all genres. Discover, read, and share the joy of literature.</p>
+          <div class="mt-3">
+            <a href="#" class="social-icons"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-icons"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-icons"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-icons"><i class="fab fa-pinterest"></i></a>
+          </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+          <h5>Quick Links</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="books.html">Books</a></li>
+            <li class="mb-2"><a href="#categories">Categories</a></li>
+            <li class="mb-2"><a href="#about">About Us</a></li>
+            <li class="mb-2"><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        
+        <!-- Customer Service -->
+        <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+          <h5>Customer Service</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="#">Shipping Policy</a></li>
+            <li class="mb-2"><a href="#">Returns & Refunds</a></li>
+            <li class="mb-2"><a href="#">FAQs</a></li>
+            <li class="mb-2"><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+        
+        <!-- Contact Info -->
+        <div class="col-lg-4 col-md-4">
+          <h5>Contact Us</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Book Street, Reading City, RC 12345</li>
+            <li class="mb-2"><i class="fas fa-phone-alt me-2"></i> (123) 456-7890</li>
+            <li class="mb-2"><i class="fas fa-envelope me-2"></i> info@bookstore.com</li>
+            <li class="mb-2"><i class="fas fa-clock me-2"></i> Monday-Friday: 9am-6pm</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Copyright -->
+      <div class="border-top pt-4 mt-4 text-center">
+        <p>&copy; 2025 Bookstore. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
